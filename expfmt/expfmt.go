@@ -44,6 +44,7 @@ const (
 	// constants, instead use FormatType().
 	fmtUnknown           Format = `<unknown>`
 	fmtText              Format = `text/plain; version=` + TextVersion + `; charset=utf-8`
+	fmtJson              Format = `application/json`
 	fmtProtoDelim        Format = protoFmt + ` encoding=delimited`
 	fmtProtoText         Format = protoFmt + ` encoding=text`
 	fmtProtoCompact      Format = protoFmt + ` encoding=compact-text`
@@ -69,6 +70,7 @@ const (
 	TypeProtoText
 	TypeTextPlain
 	TypeOpenMetrics
+	TypeJson
 )
 
 // NewFormat generates a new Format from the type provided. Mostly used for
@@ -86,6 +88,8 @@ func NewFormat(t FormatType) Format {
 		return fmtText
 	case TypeOpenMetrics:
 		return fmtOpenMetrics_1_0_0
+	case TypeJson:
+		return fmtJson
 	default:
 		return fmtUnknown
 	}
@@ -139,6 +143,8 @@ func (f Format) FormatType() FormatType {
 			return TypeTextPlain
 		}
 		return TypeUnknown
+	case "application/json":
+		return TypeJson
 	default:
 		return TypeUnknown
 	}

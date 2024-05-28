@@ -14,6 +14,7 @@
 package expfmt
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -85,6 +86,9 @@ func Negotiate(h http.Header) Format {
 		}
 		if ac.Type == "text" && ac.SubType == "plain" && (ver == TextVersion || ver == "") {
 			return fmtText + escapingScheme
+		}
+		if ac.Type == "application" && ac.SubType == "json" {
+			return fmtJson + escapingScheme
 		}
 	}
 	return fmtText + escapingScheme
@@ -184,6 +188,23 @@ func NewEncoder(w io.Writer, format Format) Encoder {
 			close: func() error {
 				_, err := FinalizeOpenMetrics(w)
 				return err
+			},
+		}
+	case TypeJson:
+		w.Write([]byte("["))
+		return encoderCloser{
+			encode: func(v *dto.MetricFamily) error {
+				p, err := json.Marshal(v)
+				if err != nil {
+					return err
+				}
+				_, err = w.Write(p)
+				w.Write([]byte(","))
+				return err
+			},
+			close: func() error {
+				w.Write([]byte("null]"))
+				return nil
 			},
 		}
 	}
